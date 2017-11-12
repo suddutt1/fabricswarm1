@@ -1,0 +1,26 @@
+OrdererOrgs:
+- Domain: banks.net
+  Name: Orderer
+  Specs:
+  - Hostname: orderer
+  - SANS:
+    - localhost
+PeerOrgs:
+- Domain: xbank.net
+  Name: BankX
+  Template:
+    Count: 1
+    SANS:
+    - localhost
+    - peer0xbank
+  Users:
+    Count: 1
+- Domain: ybank.net
+  Name: BankY
+  Template:
+    Count: 1
+    SANS:
+    - localhost
+    - peer0ybank
+  Users:
+    Count: 1

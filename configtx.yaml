@@ -1,0 +1,64 @@
+
+Profiles:
+
+    OrdererGenesis:
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+        Consortiums:
+          BankConsortium:
+             Organizations:
+                - *BankXOrg
+                - *BankYOrg
+                
+    
+    
+    bankChannel:
+        Consortium: BankConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *BankXOrg
+                - *BankYOrg
+                
+     
+Organizations:
+    - &OrdererOrg
+        Name: OrdererMSP
+        ID: OrdererMSP
+        MSPDir: crypto-config/ordererOrganizations/banks.net/msp
+    
+    - &BankXOrg
+        Name: BankXMSP
+        ID: BankXMSP
+        MSPDir: crypto-config/peerOrganizations/xbank.net/msp
+        AnchorPeers:
+          - Host: peer0.xbank.net
+            Port: 7051
+        
+    - &BankYOrg
+        Name: BankYMSP
+        ID: BankYMSP
+        MSPDir: crypto-config/peerOrganizations/ybank.net/msp
+        AnchorPeers:
+          - Host: peer0.ybank.net
+            Port: 7051
+        
+
+Orderer: &OrdererDefaults
+        OrdererType: solo
+        Addresses:
+          - orderer.banks.net:7050
+        BatchTimeout: 2s
+        BatchSize:
+          MaxMessageCount: 10
+          AbsoluteMaxBytes: 98 MB
+          PreferredMaxBytes: 512 KB
+        Kafka:
+          Brokers:
+            - 127.0.0.1:9092
+        Organizations:
+    
+Application: &ApplicationDefaults
+    Organizations:

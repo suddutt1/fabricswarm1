@@ -1,0 +1,28 @@
+{
+    "orderers":{
+        "name" :"Orderer","mspID":"OrdererMSP","domain":"banks.net","ordererHostname":"orderer","SANS":"localhost"
+    },
+    "orgs":[
+        { 
+            "name" :"BankX",
+            "domain":"xbank.net",
+            "mspID":"BankXMSP",
+            "SANS":"localhost,peer0xbank",
+            "peerCount":1,
+            "userCount":1
+        },
+	{
+            "name" :"BankY",
+            "domain":"ybank.net",
+            "mspID":"BankYMSP",
+            "SANS":"localhost,peer0ybank",
+            "peerCount":1,
+            "userCount":1
+        }
+
+        ],
+    "consortium":"BankConsortium",
+    "channels" :[
+                    {"channelName":"bank","orgs":["BankX","BankY"] }
+                ]
+}

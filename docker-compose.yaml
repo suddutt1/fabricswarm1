@@ -1,0 +1,164 @@
+version: "3"
+networks:
+  fabricnetwork: {}
+services:
+  cli:
+    image: hyperledger/fabric-tools:${IMAGE_TAG}
+    container_name: cli
+    tty: true
+    environment:
+    - CORE_PEER_TLS_ENABLED=true
+    - GOPATH=/opt/gopath
+    - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+    - CORE_LOGGING_LEVEL=DEBUG
+    - CORE_PEER_ID=cli
+    working_dir: /opt/ws
+    volumes:
+    - /var/run/:/host/var/run/
+    - /home/suddutt1/networks/swarm2:/opt/ws
+    - /home/suddutt1/networks/swarm2/chaincode/github.com/bt:/opt/gopath/src/github.com/bt
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+         - node.hostname == swarmmaster
+    networks:
+    - fabricnetwork
+  couch0:
+    container_name: couch0
+    image: hyperledger/fabric-couchdb:${IMAGE_TAG}
+    ports:
+    - 5984:5984
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+         - node.hostname == node1
+    networks:
+    - fabricnetwork
+  couch1:
+    container_name: couch1
+    image: hyperledger/fabric-couchdb:${IMAGE_TAG}
+    ports:
+    - 6984:5984
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+         - node.hostname == node2    
+    networks:
+    - fabricnetwork
+  orderer:
+    container_name: orderer.banks.net
+    image: hyperledger/fabric-orderer:${IMAGE_TAG}
+    environment:
+    - ORDERER_GENERAL_LOGLEVEL=debug
+    - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+    - ORDERER_GENERAL_GENESISMETHOD=file
+    - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesis.block
+    - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+    - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+    - ORDERER_GENERAL_TLS_ENABLED=true
+    - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+    - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+    - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+    - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+    - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+    - ORDERER_KAFKA_VERBOSE=true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+    - /home/suddutt1/networks/swarm2/genesis.block:/var/hyperledger/orderer/genesis.block
+    - /home/suddutt1/networks/swarm2/crypto-config/ordererOrganizations/banks.net/orderers/orderer.banks.net/msp:/var/hyperledger/orderer/msp
+    - /home/suddutt1/networks/swarm2/crypto-config/ordererOrganizations/banks.net/orderers/orderer.banks.net/tls/:/var/hyperledger/orderer/tls
+    ports:
+    - 7050:7050
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+         - node.hostname == swarmmaster
+    networks:
+    - fabricnetwork
+  peer0xbank:
+    container_name: peer0xbank
+    image: hyperledger/fabric-peer:${IMAGE_TAG}
+    environment:
+    - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+    - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=banknet_fabricnetwork
+    - CORE_LOGGING_LEVEL=DEBUG
+    - CORE_PEER_TLS_ENABLED=true
+    - CORE_PEER_ENDORSER_ENABLED=true
+    - CORE_PEER_GOSSIP_USELEADERELECTION=true
+    - CORE_PEER_GOSSIP_ORGLEADER=false
+    - CORE_PEER_PROFILE_ENABLED=true
+    - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+    - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+    - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+    - CORE_PEER_ID=peer0xbank
+    - CORE_PEER_ADDRESS=peer0xbank:7051
+    - CORE_PEER_CHAINCODELISTENADDRESS=peer0xbank:7052
+    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0xbank:7051
+    - CORE_PEER_LOCALMSPID=BankXMSP
+    - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couch0:5984
+    - CORE_PEER_GOSSIP_BOOTSTRAP=peer0xbank:7051
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+    - /var/run/:/host/var/run/
+    - /home/suddutt1/networks/swarm2/crypto-config/peerOrganizations/xbank.net/peers/peer0.xbank.net/msp:/etc/hyperledger/fabric/msp
+    - /home/suddutt1/networks/swarm2/crypto-config/peerOrganizations/xbank.net/peers/peer0.xbank.net/tls:/etc/hyperledger/fabric/tls
+    ports:
+    - 7051:7051
+    - 7053:7053
+    depends_on:
+    - couch0
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+         - node.hostname == node1
+    networks:
+    - fabricnetwork
+  peer0ybank:
+    container_name: peer0ybank
+    image: hyperledger/fabric-peer:${IMAGE_TAG}
+    environment:
+    - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+    - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=banknet_fabricnetwork
+    - CORE_LOGGING_LEVEL=DEBUG
+    - CORE_PEER_TLS_ENABLED=true
+    - CORE_PEER_ENDORSER_ENABLED=true
+    - CORE_PEER_GOSSIP_USELEADERELECTION=true
+    - CORE_PEER_GOSSIP_ORGLEADER=false
+    - CORE_PEER_PROFILE_ENABLED=true
+    - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+    - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+    - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+    - CORE_PEER_ID=peer0ybank
+    - CORE_PEER_ADDRESS=peer0ybank:7051
+    - CORE_PEER_CHAINCODELISTENADDRESS=peer0ybank:7052
+    - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0ybank:7051
+    - CORE_PEER_LOCALMSPID=BankYMSP
+    - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+    - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couch1:5984
+    - CORE_PEER_GOSSIP_BOOTSTRAP=peer0ybank:7051
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    volumes:
+    - /var/run/:/host/var/run/
+    - /home/suddutt1/networks/swarm2/crypto-config/peerOrganizations/ybank.net/peers/peer0.ybank.net/msp:/etc/hyperledger/fabric/msp
+    - /home/suddutt1/networks/swarm2/crypto-config/peerOrganizations/ybank.net/peers/peer0.ybank.net/tls:/etc/hyperledger/fabric/tls
+    ports:
+    - 8051:7051
+    - 8053:7053
+    depends_on:
+    - couch1
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+         - node.hostname == node2     
+    networks:
+    - fabricnetwork
