@@ -1,5 +1,10 @@
 # Hyperledger Fabric Swarm with 3 nodes
 First Docker Swarm With 3 machines and balance transfer
+# Hit a road block 
+## Not able to instantiate the chain code 
+Here is the clue : ( Endorsed by IBM Blockchain CTO) 
+https://lists.hyperledger.org/pipermail/hyperledger-fabric/2017-September/001750.html
+I'll keep working on this based on the hint.
 
 ### The Swram consist of the following 3 nodes/hosts
 1. Master node ( hostname : swarmmaster ) contains the orderer and cli
