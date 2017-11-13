@@ -34,7 +34,7 @@ Organizations:
         ID: BankXMSP
         MSPDir: crypto-config/peerOrganizations/xbank.net/msp
         AnchorPeers:
-          - Host: peer0.xbank.net
+          - Host: peer0xbank
             Port: 7051
         
     - &BankYOrg
@@ -42,14 +42,14 @@ Organizations:
         ID: BankYMSP
         MSPDir: crypto-config/peerOrganizations/ybank.net/msp
         AnchorPeers:
-          - Host: peer0.ybank.net
+          - Host: peer0ybank
             Port: 7051
         
 
 Orderer: &OrdererDefaults
         OrdererType: solo
         Addresses:
-          - orderer.banks.net:7050
+          - orderer:7050
         BatchTimeout: 2s
         BatchSize:
           MaxMessageCount: 10

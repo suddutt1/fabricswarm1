@@ -196,9 +196,10 @@ func (t *SimpleChaincode) query(stub shim.ChaincodeStubInterface, args []string)
 }
 
 func main() {
-	err := shim.Start(new(SimpleChaincode))
+	logger.SetLevel(shim.LogDebug)
+        err := shim.Start(new(SimpleChaincode))
 	if err != nil {
-		logger.Errorf("Error starting Simple chaincode: %s", err)
+		logger.Errorf("Error starting Simple chaincode: %v", err)
 	}
 }
 
